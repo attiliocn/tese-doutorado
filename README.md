@@ -57,15 +57,16 @@ Observações:
 - `ch2.RealSystemBestConformers.xyz` é o único arquivo com geometrias de nível DFT; os demais
   trazem geometrias GFN1-xTB.
 
-## Energias (`ch2.libraryEnergies.csv`, `ch2.libraryBestConformers.csv` e `esi.literatureSearch.tsv`)
+## Energias (`ch2.libraryEnergies.csv` e `ch2.libraryBestConformers.csv`)
 
 | Arquivo | Conteúdo | Tabela na tese |
 |---|---|---|
 | `ch2.libraryEnergies.csv` | Energias dos 7033 confôrmeros das 873 espécies da biblioteca, no protocolo composto TPSS0-D3(BJ)/def2-TZVP SMD (benzeno)//GFN1-xTB. Colunas: índice; `standardized label` (rótulo da espécie e do confôrmero); `E(el)`, a energia eletrônica TPSS0, em E<sub>h</sub>; `G`, a energia livre, igual a E(el) mais a correção térmica GFN1-xTB, em E<sub>h</sub>, a 298.15 K e 1 mol/L; `geometry label` (rótulo da estrutura no `.xyz`) | Apêndice D |
 | `ch2.libraryBestConformers.csv` | O confôrmero de menor energia livre de cada uma das 873 espécies. É o confôrmero usado nas barreiras e nas energias de reação do Capítulo 3. Colunas: índice; `standardized label`; `E(el)`; `G` (mesmas unidades e estado padrão do arquivo anterior) | Fonte das Tabelas D.2, D.3 e D.4 |
-| `esi.literatureSearch.tsv` | Levantamento bibliográfico de 72 reações de troca de ligantes com complexos Mo-alquilideno (preparo *in situ* ou com isolamento por cristalização). Colunas: entrada; referência (chave BibTeX); composto; imido; ROH; pirrolido; equivalentes de ROH; solvente; temperatura (°C); tempo (min); preparo; produtos BP, MAP e BIS (%); conversão ou rendimento (%); notas | Tabela C.1, Apêndice C |
 
 Abreviações: **BP** = bispirrolido; **MAP** = monoarilóxido pirrolido; **BIS** = bisarilóxido.
+
+Os dados do levantamento bibliográfico de 72 reações não estão aqui: a tabela completa está impressa no Apêndice C da tese.
 
 ## Microcinética (`.csv`)
 
