@@ -9,8 +9,9 @@ mecanismo da protonólise pelo fenol (Capítulo 2 da tese) e o escopo computacio
 biblioteca de reações de troca (Capítulo 3), com modelos microcinéticos e modelos estatísticos
 para prever qual produto se forma, o monoarilóxido ou o bisarilóxido.
 
-Os arquivos são os mesmos do material suplementar da tese. A numeração das tabelas e dos
-apêndices citada aqui é a do PDF da tese.
+Os dados são os mesmos do material suplementar da tese, e o programa que roda a cinética
+deles vem junto, em `microkinetics/`. A numeração das tabelas e dos apêndices citada aqui é a
+do PDF da tese.
 
 ## Como os arquivos estão organizados
 
@@ -61,18 +62,19 @@ Observações:
 - `xyz/ch2.RealSystemBestConformers.xyz` é o único arquivo com geometrias de nível DFT; os demais
   trazem geometrias GFN1-xTB.
 
-## Energias (`tables/ch2.libraryEnergies.csv` e `tables/ch2.libraryBestConformers.csv`)
+## Energias (`.csv`)
 
 | Arquivo | Conteúdo | Tabela na tese |
 |---|---|---|
 | `tables/ch2.libraryEnergies.csv` | Energias dos 7033 confôrmeros das 873 espécies da biblioteca, no protocolo composto TPSS0-D3(BJ)/def2-TZVP SMD (benzeno)//GFN1-xTB. Colunas: índice; `standardized label` (rótulo da espécie e do confôrmero); `E(el)`, a energia eletrônica TPSS0, em E<sub>h</sub>; `G`, a energia livre, igual a E(el) mais a correção térmica GFN1-xTB, em E<sub>h</sub>, a 298.15 K e 1 mol/L; `geometry label` (rótulo da estrutura no `.xyz`) | Apêndice D |
 | `tables/ch2.libraryBestConformers.csv` | O confôrmero de menor energia livre de cada uma das 873 espécies. É o confôrmero usado nas barreiras e nas energias de reação do Capítulo 3. Colunas: índice; `standardized label`; `E(el)`; `G` (mesmas unidades e estado padrão do arquivo anterior) | Fonte das Tabelas D.2, D.3 e D.4 |
+| `tables/ch2.RealSystemBestConformers.csv` | Energias absolutas (E(el), H e G, em hartree, a 298.15 K e 1 atm) das 108 espécies do sistema real — o par em energia do `xyz/ch2.RealSystemBestConformers.xyz`. Colunas: `custom_label`; `L_conformer`; `E_el_hartree`; `H_hartree`; `G_hartree`; `ifreq_cm-1` (a frequência imaginária dos estados de transição) | Tabela D.1, Apêndice D |
 
 Abreviações: **BP** = bispirrolido; **MAP** = monoarilóxido pirrolido; **BIS** = bisarilóxido.
 
 Os dados do levantamento bibliográfico de 72 reações não estão aqui: a tabela completa está impressa no Apêndice C da tese.
 
-## Microcinética (`.csv`)
+## Microcinética: os resultados (`.csv`)
 
 Resultados da microcinética com propagação de incerteza por Monte Carlo (1000 amostras, semente
 42), com energias livres a 1 mol/L. Para cada reação e condição:
@@ -116,10 +118,40 @@ com todos os descritores calculados, inclusive as dos fenóis sintéticos). Colu
 `mlr_barrier1` (`train`, `validation` ou vazio, quando a reação não entra no modelo); e os 322
 descritores, com os nomes definidos no Apêndice E. Correspondem às Tabelas E.1 a E.5.
 
-## Cinética
+## Cinética: o programa de microcinética (`microkinetics/`)
 
-*(em preparação)* — os arquivos da cinética das reações (perfis de energia, agregados das
-simulações de Monte Carlo e as saídas por condição) serão acrescentados aqui.
+O programa que roda a cinética da troca com propagação de incerteza por Monte Carlo e
+**confere o resultado contra as tabelas publicadas aqui**. Ele monta o perfil de energia
+de cada reação a partir de energias livres em hartree, converte as barreiras em
+constantes de velocidade pela equação de Eyring, integra as duas trocas e repete o
+cálculo com as energias perturbadas 1000 vezes, sorteando o desvio dos intermediários e
+dos estados de transição de forma correlacionada. O resultado é o produto previsto e o
+`p_MAP`, a fração das simulações em que o monoarilóxido é o majoritário.
+
+**Requisitos:** Python 3.12 com `numpy` 2.2, `pandas` 2.3 e `scipy` 1.16 (as versões em
+que foi testado).
+
+```bash
+cd microkinetics
+python check_against_thesis.py          # o teste de aceite, ~4 s, não roda cinética
+python run_reaction.py im0-ROH28        # uma reação nas quatro condições padrão
+python run_reaction.py --listar         # reações boas para testar
+python run_reaction.py --help
+```
+
+O `check_against_thesis.py` confere, contra os dados deste repositório, os perfis e as
+barreiras da biblioteca (6 reações), os das reações publicadas calculadas em DFT (8) e as
+16 trajetórias sem perturbação que vêm em `microkinetics/reference/` — se ele não disser
+`CONFERE`, nada depois dele vale. Uma reação × 4 condições × 1000 amostras leva cerca de
+3 minutos; a biblioteca inteira levaria dezenas de horas.
+
+O programa lê `tables/ch2.libraryBestConformers.csv`, `tables/ch2.RealSystemBestConformers.csv`,
+`tables/ch2.microkineticsLibrary.csv`, `tables/ch2.microkineticsReported.csv`,
+`tables/ch2.microkineticsReportedStandard.csv` e `tables/ch2.phenolCodes.csv`, e o
+`microkinetics/README.md` explica a estrutura, o formato do arquivo de energias de quem
+traz as suas e **a pegadinha do estado padrão** (1 atm × 1 mol/L), que é o ponto em que um
+sinal trocado muda o produto previsto. A rodada de exemplo, que reproduz o `p_MAP` da
+tabela da biblioteca, está em `microkinetics/exports/im0-ROH28/`.
 
 ## Métodos
 
@@ -129,8 +161,10 @@ tabelas acima, e a descrição completa dos procedimentos está no capítulo de 
 
 ## Código
 
-O código usado nas análises (busca conformacional, microcinética, Monte Carlo e modelos
-estatísticos) ainda não está publicado aqui.
+O programa de microcinética e do Monte Carlo está em [`microkinetics/`](microkinetics),
+com o teste de aceite que o confere contra os dados publicados aqui. O restante do código
+usado nas análises (busca conformacional, extração dos descritores e os modelos
+estatísticos) ainda não está publicado.
 
 ## Licença e citação
 
